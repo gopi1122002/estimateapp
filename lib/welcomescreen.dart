@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'loginscreen.dart';
+import 'registerscreen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -102,7 +103,12 @@ class WelcomeScreen extends StatelessWidget {
                 // 🆕 Create Account Text
                 TextButton(
                   onPressed: () {
-                    // Navigate to Create Account screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SignupScreen(),
+                      ),
+                    );
                   },
                   child: const Text(
                     'Create an account',

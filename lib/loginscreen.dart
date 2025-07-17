@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dashboardscreen.dart';
+import 'navigation.dart';
 
 class LoginScreenCustomBackground extends StatefulWidget {
   const LoginScreenCustomBackground({super.key});
@@ -22,97 +24,99 @@ class _LoginScreenCustomBackgroundState extends State<LoginScreenCustomBackgroun
       body: Stack(
         children: [
           // Top-left large faded circle
-          Positioned(
-            top: -120,
-            left: -100,
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFB2EFE5).withOpacity(0.3),
-              ),
-            ),
-          ),
+          // Positioned(
+          //   top: -120,
+          //   right: 20,
+          //   left: -200,
+          //   child: Container(
+          //     width: 380,
+          //     height: 500,
+          //     decoration: BoxDecoration(
+          //       shape: BoxShape.circle,
+          //       color: const Color(0xFFB2EFE5).withOpacity(0.3),
+          //     ),
+          //   ),
+          // ),
 
           // Top-left circle outline
-          Positioned(
-            top: -110,
-            left: -90,
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFB2EFE5).withOpacity(0.6),
-                  width: 1.5,
-                ),
-              ),
-            ),
-          ),
+          // Positioned(
+          //   top: -320,
+          //   left: -40,
+          //   right: 70,
+          //   child: Container(
+          //     width: 460,
+          //     height: 850,
+          //     decoration: BoxDecoration(
+          //       shape: BoxShape.circle,
+          //       border: Border.all(
+          //         color: const Color(0xFFB2EFE5).withOpacity(0.9),
+          //         width: 1.2,
+          //       ),
+          //     ),
+          //   ),
+          // ),
 
           // Top-right faded circle
-          Positioned(
-            top: -60,
-            right: -70,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFB2EFE5).withOpacity(0.2),
-              ),
-            ),
-          ),
+          // Positioned(
+          //   top: -60,
+          //   right: -70,
+          //   child: Container(
+          //     width: 200,
+          //     height: 200,
+          //     decoration: BoxDecoration(
+          //       shape: BoxShape.circle,
+          //       color: const Color(0xFFB2EFE5).withOpacity(0.2),
+          //     ),
+          //   ),
+          // ),
 
-          // Top-right circle outline
-          Positioned(
-            top: -50,
-            right: -60,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFB2EFE5).withOpacity(0.5),
-                  width: 1.5,
-                ),
-              ),
-            ),
-          ),
+          // // Top-right circle outline
+          // Positioned(
+          //   top: -50,
+          //   right: -60,
+          //   child: Container(
+          //     width: 200,
+          //     height: 200,
+          //     decoration: BoxDecoration(
+          //       shape: BoxShape.circle,
+          //       border: Border.all(
+          //         color: const Color(0xFFB2EFE5).withOpacity(0.5),
+          //         width: 1.5,
+          //       ),
+          //     ),
+          //   ),
+          // ),
 
-          // Small mid-left faded circle
-          Positioned(
-            top: 100,
-            left: 60,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFB2EFE5).withOpacity(0.3),
-              ),
-            ),
-          ),
+          // // Small mid-left faded circle
+          // Positioned(
+          //   top: 100,
+          //   left: 60,
+          //   child: Container(
+          //     width: 100,
+          //     height: 100,
+          //     decoration: BoxDecoration(
+          //       shape: BoxShape.circle,
+          //       color: const Color(0xFFB2EFE5).withOpacity(0.3),
+          //     ),
+          //   ),
+          // ),
 
           // Small mid-left circle outline
-          Positioned(
-            top: 105,
-            left: 65,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFB2EFE5).withOpacity(0.5),
-                  width: 1.2,
-                ),
-              ),
-            ),
-          ),
+          // Positioned(
+          //   top: 105,
+          //   left: 65,
+          //   child: Container(
+          //     width: 100,
+          //     height: 100,
+          //     decoration: BoxDecoration(
+          //       shape: BoxShape.circle,
+          //       border: Border.all(
+          //         color: const Color(0xFFB2EFE5).withOpacity(0.5),
+          //         width: 1.2,
+          //       ),
+          //     ),
+          //   ),
+          // ),
 
           /// 🌿 Foreground Login UI
 
@@ -124,7 +128,7 @@ class _LoginScreenCustomBackgroundState extends State<LoginScreenCustomBackgroun
                 children: [
                   /// 🏷️ Header
                   Padding(
-                    padding: const EdgeInsets.only(top: 150),
+                    padding: const EdgeInsets.only(top: 100),
                     child: Center(
                       child: Column(
                         children: [
@@ -141,8 +145,8 @@ class _LoginScreenCustomBackgroundState extends State<LoginScreenCustomBackgroun
                           Text(
                             'TO CONTINUE',
                             style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
+                              fontSize: 21,
+                              color: Colors.black,
                               letterSpacing: 1,
                             ),
                           ),
@@ -151,7 +155,7 @@ class _LoginScreenCustomBackgroundState extends State<LoginScreenCustomBackgroun
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 80),
 
                   /// 📧 Email Field
                   const Text('Enter your email ID',
@@ -216,7 +220,7 @@ class _LoginScreenCustomBackgroundState extends State<LoginScreenCustomBackgroun
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 80),
 
                   /// ✅ Log In Button
                   SizedBox(
@@ -224,7 +228,10 @@ class _LoginScreenCustomBackgroundState extends State<LoginScreenCustomBackgroun
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        // TODO: Navigate or login
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6ed7b9),
