@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'businessscreen.dart';
 import 'profilescreen.dart';
+import 'editscreenprofile.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -80,7 +81,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
                   }),
-                  _buildDrawerItem(Icons.edit_note_outlined, "Edit Profile"),
+                  _buildDrawerItem(Icons.edit_note_outlined, "Edit Profile", onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfileScreen()));
+                  }),
                   _buildDrawerItem(Icons.star_border, "Rating"),
                   _buildDrawerItem(Icons.help_outline, "FAQ"),
                   _buildDrawerItem(Icons.privacy_tip_outlined, "Privacy Policy"),
@@ -107,13 +111,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildDashboardCard(
                   icon: Icons.description_outlined,
                   title: 'TOTAL ESTIMATES',
-                  value: '120',
+                  value: '',
                   subtitle: 'Generated in last month',
                   percentage: 55,
                 ),
                 _buildDashboardCard(
                   title: 'TOTAL REVENUE',
-                  value: '\$35,000',
+                  value: '',
                   subtitle: 'Revenue from accepted estimates',
                   icon: Icons.attach_money,
                   percentage: 75,
@@ -121,14 +125,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildDashboardCard(
                   icon: Icons.show_chart,
                   title: 'AVERAGE ESTIMATE',
-                  value: '\$291.67',
+                  value: '',
                   subtitle: 'Based on all estimates',
                   percentage: 60,
                 ),
                 _buildDashboardCard(
                   icon: Icons.access_time,
                   title: 'PENDING ESTIMATES',
-                  value: '15',
+                  value: '',
                   subtitle: 'Estimates awaiting approval',
                   percentage: 40,
                 ),

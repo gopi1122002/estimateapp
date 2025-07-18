@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart'; // Ensure this import is present
 import 'navigation.dart';
+import 'editscreenprofile.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -13,17 +14,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _nameController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _dobController = TextEditingController();
-  final _genderController = TextEditingController();
-  final _maritalStatusController = TextEditingController();
-  final _professionController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _skillsController = TextEditingController();
-  final _projectsController = TextEditingController();
-
+  String _username = '';
+  String _dob = '';
+  String _gender = '';
+  String _maritalStatus = '';
+  String _profession = '';
+  String _email = '';
+  String _phone = '';
+  String _skills = '';
+  String _projects = '';
   File? _imageFile;
 
   @override
@@ -34,18 +33,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadProfileData() async {
     final prefs = await SharedPreferences.getInstance();
-
     setState(() {
-      _nameController.text = prefs.getString('name') ?? '';
-      _usernameController.text = prefs.getString('username') ?? '';
-      _dobController.text = prefs.getString('dob') ?? '';
-      _genderController.text = prefs.getString('gender') ?? '';
-      _maritalStatusController.text = prefs.getString('maritalStatus') ?? '';
-      _professionController.text = prefs.getString('profession') ?? '';
-      _emailController.text = prefs.getString('email') ?? '';
-      _phoneController.text = prefs.getString('phone') ?? '';
-      _skillsController.text = prefs.getString('skills') ?? '';
-      _projectsController.text = prefs.getString('projects') ?? '';
+      _username = prefs.getString('username') ?? '';
+      _dob = prefs.getString('dob') ?? '';
+      _gender = prefs.getString('gender') ?? '';
+      _maritalStatus = prefs.getString('maritalStatus') ?? '';
+      _profession = prefs.getString('profession') ?? '';
+      _email = prefs.getString('email') ?? '';
+      _phone = prefs.getString('phone') ?? '';
+      _skills = prefs.getString('skills') ?? '';
+      _projects = prefs.getString('projects') ?? '';
 
       final base64Image = prefs.getString('profileImage');
       if (base64Image != null && base64Image.isNotEmpty) {
@@ -55,45 +52,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _convertBase64ToFile(String base64Image) async {
-    final bytes = base64Decode(base64Image);
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/profile_image.png');
-    await file.writeAsBytes(bytes);
-    setState(() {
-      _imageFile = file;
-    });
-  }
-
-  Future<void> _saveProfileData() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.setString('name', _nameController.text);
-    await prefs.setString('username', _usernameController.text);
-    await prefs.setString('dob', _dobController.text);
-    await prefs.setString('gender', _genderController.text);
-    await prefs.setString('maritalStatus', _maritalStatusController.text);
-    await prefs.setString('profession', _professionController.text);
-    await prefs.setString('email', _emailController.text);
-    await prefs.setString('phone', _phoneController.text);
-    await prefs.setString('skills', _skillsController.text);
-    await prefs.setString('projects', _projectsController.text);
-
-    if (_imageFile != null) {
-      final bytes = await _imageFile!.readAsBytes();
-      await prefs.setString('profileImage', base64Encode(bytes));
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile saved successfully!')),
-    );
-  }
-
-  Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+    try {
+      final bytes = base64Decode(base64Image);
+      final dir = await getTemporaryDirectory(); // This is the correct method from path_provider
+      final file = File('${dir.path}/profile_image.png');
+      await file.writeAsBytes(bytes);
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _imageFile = file;
       });
+    } catch (e) {
+      print('Error converting base64 to file: $e');
     }
   }
 
@@ -102,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF6ED7B9),
         elevation: 0,
         title: const Text('Profile', style: TextStyle(color: Colors.black)),
         centerTitle: true,
@@ -115,72 +83,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.black),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+              ).then((_) => _loadProfileData()); // Reload data after editing
+            },
+          ),
+        ],
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             const SizedBox(height: 20),
-            GestureDetector(
-              onTap: _pickImage,
-              child: Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey[400],
-                    backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
-                    child: _imageFile == null
-                        ? const Icon(Icons.person, size: 50, color: Colors.white)
-                        : null,
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 14,
-                      child: Icon(Icons.edit, size: 16, color: Colors.grey[700]),
-                    ),
-                  ),
-                ],
-              ),
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.grey[400],
+              backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
+              child: _imageFile == null
+                  ? const Icon(Icons.person, size: 50, color: Colors.white)
+                  : null,
             ),
-
             const SizedBox(height: 12),
-            _buildTextField(label: 'Full Name', controller: _nameController),
-            _buildTextField(label: 'Username', controller: _usernameController),
-
+            _buildInfoField(label: 'Username', value: _username),
             const SizedBox(height: 20),
             _buildSectionTitle('Personal Info'),
-            _buildTextField(label: 'Date of Birth', controller: _dobController),
-            _buildTextField(label: 'Gender', controller: _genderController),
-            _buildTextField(label: 'Marital Status', controller: _maritalStatusController),
-            _buildTextField(label: 'Profession', controller: _professionController),
-            _buildTextField(label: 'Email', controller: _emailController),
-            _buildTextField(label: 'Phone', controller: _phoneController),
-
+            _buildInfoField(label: 'Date of Birth', value: _dob),
+            _buildInfoField(label: 'Gender', value: _gender),
+            _buildInfoField(label: 'Marital Status', value: _maritalStatus),
+            _buildInfoField(label: 'Profession', value: _profession),
+            _buildInfoField(label: 'Email', value: _email),
+            _buildInfoField(label: 'Phone', value: _phone),
             const SizedBox(height: 20),
             _buildSectionTitle('Skills'),
-            _buildTextField(label: 'Skills', controller: _skillsController),
-
+            _buildInfoField(label: 'Skills', value: _skills),
             const SizedBox(height: 20),
             _buildSectionTitle('Projects'),
-            _buildTextField(label: 'Projects', controller: _projectsController),
-
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6ED7B9),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: _saveProfileData,
-                child: const Text('Save', style: TextStyle(color: Colors.white)),
-              ),
-            ),
+            _buildInfoField(label: 'Projects', value: _projects),
             const SizedBox(height: 40),
           ],
         ),
@@ -188,26 +131,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTextField({required String label, required TextEditingController controller}) {
+  Widget _buildInfoField({required String label, required String value}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Colors.black),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-          enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Color(0xFFDCDCDC)),
-            borderRadius: BorderRadius.circular(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(color: Colors.black54, fontSize: 12),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Color(0xFF6ED7B9)),
-            borderRadius: BorderRadius.circular(10),
+          const SizedBox(height: 4),
+          Text(
+            value.isEmpty ? 'Not provided' : value,
+            style: const TextStyle(color: Colors.black, fontSize: 16),
           ),
-        ),
+          const Divider(color: Color(0xFFDCDCDC)),
+        ],
       ),
     );
   }

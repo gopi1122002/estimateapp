@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dashboardscreen.dart';
 import 'navigation.dart';
+import 'forgotpassword.dart';
 
 class LoginScreenCustomBackground extends StatefulWidget {
   const LoginScreenCustomBackground({super.key});
@@ -212,7 +213,12 @@ class _LoginScreenCustomBackgroundState extends State<LoginScreenCustomBackgroun
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => ForgotPasswordScreen()),
+                        );
+                      },
                       child: const Text(
                         'Forgot password?',
                         style: TextStyle(color: Colors.blueAccent),

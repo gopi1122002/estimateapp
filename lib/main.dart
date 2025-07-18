@@ -16,9 +16,9 @@ class MyApp extends StatelessWidget {
     final isOnboarded = prefs.getBool('isOnboarded') ?? false;
 
     if (isOnboarded) {
-      return const LoginScreenCustomBackground(); // Login screen
+      return const OnboardingScreen(); // Login screen
     } else {
-      return const OnboardingScreen(); // First time only
+      return const LoginScreenCustomBackground(); // First time only
     }
   }
 
