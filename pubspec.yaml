@@ -68,6 +68,7 @@ flutter:
     - assets/images/onboardingscreen1.png
     - assets/images/tree.png
     - assets/images/otpscreen.png
+    - assets/images/generate.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

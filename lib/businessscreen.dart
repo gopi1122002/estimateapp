@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'navigation.dart';
 
 class BusinessDetailsScreen extends StatefulWidget {
   const BusinessDetailsScreen({super.key});
@@ -102,6 +103,15 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
           'Business details',
           style: TextStyle(color: Colors.black),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const  MainNavigationScreen()),
+            );
+          },
+        ),
         automaticallyImplyLeading: false, // Remove the back arrow
       ),
       body: Padding(
@@ -109,6 +119,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              const SizedBox(height: 12),
               _buildTextField('Business name', _businessNameController),
               const SizedBox(height: 12),
               _buildTextField('Your name', _yourNameController),
@@ -173,7 +184,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                   ),
                   onPressed: _saveBusinessData,
                   child: const Text(
-                    'Next',
+                    'Save',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -245,7 +256,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
         child: Text(
           _selectedDate != null
               ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-              : 'Tap to select a date',
+              : 'Date format',
           style: const TextStyle(fontSize: 16),
         ),
       ),
@@ -271,7 +282,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
             selectionDecoration: BoxDecoration(
               color: const Color(0xFF6ED7B9).withOpacity(0.3),
               border: Border.all(color: const Color(0xFF6ED7B9), width: 2),
-              shape: BoxShape.circle,
+              // shape: BoxShape.circle,
             ),
             monthViewSettings: const MonthViewSettings(
               appointmentDisplayMode: MonthAppointmentDisplayMode.none,

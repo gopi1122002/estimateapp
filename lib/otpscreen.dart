@@ -65,16 +65,62 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       return;
     }
 
-    // OTP is valid
+    // OTP is valid, show success dialog
     setState(() => _isOtpInvalid = false);
     _clearOTPFields();
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreenCustomBackground()),
-    );
+    _showSuccessDialog();
   }
 
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24), // Increased padding from 16 to 24
+            constraints: const BoxConstraints(
+              minWidth: 350, // Added minimum width to increase size
+              minHeight: 350, // Added minimum height to increase size
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.redAccent,
+                  child: Icon(Icons.check, size: 60, color: Colors.white),
+                ),
+                const SizedBox(height: 25),
+                const Text(
+                  'Login successful',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 55),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6ED7B9),
+                    minimumSize: const Size(130, 50),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context); // Close dialog
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginScreenCustomBackground()),
+                    ); // Navigate back to LoginScreen
+                  },
+
+                  child: const Text('Okay', style: TextStyle(color: Colors.white,fontSize: 20)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   void _clearOTPFields() {
     for (var controller in _otpControllers) {
@@ -101,7 +147,6 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       height: 60,
       child: Focus(
         onKey: (node, event) {
-          // Only handle backspace on key down
           if (event.logicalKey.keyLabel == 'Backspace' &&
               event is RawKeyDownEvent &&
               _otpControllers[index].text.isEmpty &&
@@ -144,7 +189,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             ),
           ),
           onChanged: (value) {
-            setState(() => _isOtpInvalid = false); // Clear red border
+            setState(() => _isOtpInvalid = false);
             if (value.isNotEmpty && index < _focusNodes.length - 1) {
               FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
             }
@@ -153,7 +198,6 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

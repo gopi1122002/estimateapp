@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path_provider/path_provider.dart'; // Ensure this import is present
+import 'package:path_provider/path_provider.dart';
 import 'navigation.dart';
 import 'editscreenprofile.dart';
 
@@ -23,6 +23,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _phone = '';
   String _skills = '';
   String _projects = '';
+  // Business details fields
+  String _businessName = '';
+  String _yourName = '';
+  String _gstin = '';
+  String _businessLocation = '';
+  String _addressLine = '';
+  String _city = '';
+  String _state = '';
+  String _businessDate = '';
   File? _imageFile;
 
   @override
@@ -34,6 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadProfileData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
+      // Existing profile fields
       _username = prefs.getString('username') ?? '';
       _dob = prefs.getString('dob') ?? '';
       _gender = prefs.getString('gender') ?? '';
@@ -43,6 +53,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _phone = prefs.getString('phone') ?? '';
       _skills = prefs.getString('skills') ?? '';
       _projects = prefs.getString('projects') ?? '';
+      // Business details fields
+      _businessName = prefs.getString('businessName') ?? '';
+      _yourName = prefs.getString('yourName') ?? '';
+      _gstin = prefs.getString('gstin') ?? '';
+      _businessLocation = prefs.getString('businessLocation') ?? '';
+      _addressLine = prefs.getString('addressLine') ?? '';
+      _city = prefs.getString('city') ?? '';
+      _state = prefs.getString('state') ?? '';
+      _businessDate = prefs.getString('businessDate') ?? '';
 
       final base64Image = prefs.getString('profileImage');
       if (base64Image != null && base64Image.isNotEmpty) {
@@ -54,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _convertBase64ToFile(String base64Image) async {
     try {
       final bytes = base64Decode(base64Image);
-      final dir = await getTemporaryDirectory(); // This is the correct method from path_provider
+      final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/profile_image.png');
       await file.writeAsBytes(bytes);
       setState(() {
@@ -118,6 +137,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildInfoField(label: 'Profession', value: _profession),
             _buildInfoField(label: 'Email', value: _email),
             _buildInfoField(label: 'Phone', value: _phone),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Business Info'),
+            _buildInfoField(label: 'Business Name', value: _businessName),
+            _buildInfoField(label: 'Your Name', value: _yourName),
+            _buildInfoField(label: 'GSTIN', value: _gstin),
+            _buildInfoField(label: 'Business Location', value: _businessLocation),
+            _buildInfoField(label: 'Address Line', value: _addressLine),
+            _buildInfoField(label: 'City', value: _city),
+            _buildInfoField(label: 'State', value: _state),
+            _buildInfoField(label: 'Business Date', value: _businessDate),
             const SizedBox(height: 20),
             _buildSectionTitle('Skills'),
             _buildInfoField(label: 'Skills', value: _skills),
