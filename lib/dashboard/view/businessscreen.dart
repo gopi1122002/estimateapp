@@ -17,6 +17,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
   final _yourNameController = TextEditingController();
   final _gstinController = TextEditingController();
   final _businessLocationController = TextEditingController();
+  final _ProductlistLocationController = TextEditingController();
   final _addressLineController = TextEditingController();
   final _cityController = TextEditingController();
 
@@ -45,6 +46,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
         _yourNameController.text = prefs.getString('yourName') ?? '';
         _gstinController.text = prefs.getString('gstin') ?? '';
         _businessLocationController.text = prefs.getString('businessLocation') ?? '';
+        _ProductlistLocationController.text =prefs.getString('productlist') ?? '';
         _addressLineController.text = prefs.getString('addressLine') ?? '';
         _cityController.text = prefs.getString('city') ?? '';
         _selectedState = prefs.getString('state') ?? null;
@@ -72,6 +74,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
       await prefs.setString('yourName', _yourNameController.text);
       await prefs.setString('gstin', _gstinController.text);
       await prefs.setString('businessLocation', _businessLocationController.text);
+      await prefs.setString('ProductList', _ProductlistLocationController.text);
       await prefs.setString('addressLine', _addressLineController.text);
       await prefs.setString('city', _cityController.text);
       if (_selectedState != null) {
@@ -129,6 +132,8 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
               _buildTextField('Business location', _businessLocationController),
               const SizedBox(height: 12),
               _buildCalendarDropdown('Choose a date'),
+              const SizedBox(height: 12),
+              _buildTextField('Product list', _ProductlistLocationController),
               const SizedBox(height: 12),
               _buildTextField('Address line', _addressLineController),
               const SizedBox(height: 12),
@@ -212,6 +217,9 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
       case 'Business location':
         icon = Icons.location_city;
         break;
+      case 'Product list':
+        icon = Icons.list_sharp;
+        break;
       case 'Address line':
         icon = Icons.home;
         break;
@@ -251,7 +259,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
           labelText: label,
           prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFF6ED7B9)),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
         ),
         child: Text(
           _selectedDate != null

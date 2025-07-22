@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  get: ^4.7.2
   cupertino_icons: ^1.0.8
   easy_localization: ^3.0.7+1
   shared_preferences: ^2.5.3
@@ -69,6 +70,7 @@ flutter:
     - assets/images/tree.png
     - assets/images/otpscreen.png
     - assets/images/generate.png
+    - assets/images/noestimate.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

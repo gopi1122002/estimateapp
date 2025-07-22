@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dashboardscreen.dart';
-import 'navigation.dart';
+
+import '../dashboard/view/navigation.dart';
 import 'forgotpassword.dart';
 
 class LoginScreenCustomBackground extends StatefulWidget {

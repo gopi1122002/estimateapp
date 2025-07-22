@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'businessscreen.dart';
-import 'profilescreen.dart';
+import '../../Menu/profilescreen.dart';
 import 'editscreenprofile.dart';
-import 'newestimate.dart';
-
+import '../../Menu/newestimate.dart';
+import '../../Menu/viewestimate.dart'; // Add this import
+import '../../Menu/invoice.dart';
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic>? estimateDetails;
 
@@ -16,14 +17,16 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   bool isDarkMode = false;
-  static List<Map<String, dynamic>> recentEstimates = [];
+  List<Map<String, dynamic>> recentEstimates = [];
 
   @override
   void initState() {
     super.initState();
+    print('Received estimateDetails: ${widget.estimateDetails}'); // Debug log
     if (widget.estimateDetails != null) {
       setState(() {
         recentEstimates.add(widget.estimateDetails!);
+        print('Added to recentEstimates. Count: ${recentEstimates.length}'); // Debug log
       });
     }
   }
@@ -92,6 +95,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _buildDrawerItem(Icons.receipt_long_outlined, "New Estimate", onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const NewEstimateScreen()));
+                  }),
+                  _buildDrawerItem(Icons.visibility, "View Estimates", onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ViewEstimateScreen(estimates: recentEstimates)),
+                    );
                   }),
                   _buildDrawerItem(Icons.settings, "Setting"),
                   _buildDrawerItem(Icons.notifications_none, "Notification"),
@@ -181,6 +191,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         TextButton(
                           onPressed: () {
+                            print('Navigating to InvoiceScreen with estimate: $estimate');
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -191,19 +202,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           style: TextButton.styleFrom(foregroundColor: Colors.blue),
                           child: const Text('View'),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            // Mark as complete logic (placeholder)
-                          },
-                          style: TextButton.styleFrom(foregroundColor: Colors.green),
-                          child: const Text('Complete'),
-                        ),
+                        // TextButton(
+                        //   onPressed: () {
+                        //     // Mark as complete logic (placeholder)
+                        //   },
+                        //   style: TextButton.styleFrom(foregroundColor: Colors.green),
+                        //   child: const Text('Complete'),
+                        // ),
                       ],
                     ),
                   ),
                 ),
+            ] else ...[
+              const Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Text('No recent estimates available.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+              ),
             ],
-            // Add recent estimate widgets if needed
+            // Temporary refresh button for testing
+            // ElevatedButton(
+            //   onPressed: () => setState(() {}),
+            //   child: const Text('Refresh'),
+            // ),
           ],
         ),
       ),
@@ -308,78 +328,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 12),
           Icon(icon, size: 35, color: Colors.teal),
         ],
-      ),
-    );
-  }
-}
-
-// New InvoiceScreen widget
-class InvoiceScreen extends StatelessWidget {
-  final Map<String, dynamic> estimate;
-
-  const InvoiceScreen({super.key, required this.estimate});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF6ED7B9),
-        elevation: 0,
-        title: const Text('Invoice', style: TextStyle(color: Colors.black)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            side: const BorderSide(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Invoice Details', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                Text('Customer: ${estimate['customer']['name'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                Text('GSTIN: ${estimate['customer']['gstin'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                Text('Place of Supply: ${estimate['customer']['placeOfSupply'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                Text('Address: ${estimate['customer']['address'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                Text('City: ${estimate['customer']['city'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                Text('State: ${estimate['customer']['state'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                Text('Country: ${estimate['customer']['country'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 16),
-                Text('Estimate Date: ${estimate['estimateDate'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                Text('Expiry Date: ${estimate['expiryDate'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                Text('Estimate Number: ${estimate['estimateNumber'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                Text('Currency: ${estimate['currency'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 16),
-                const Text('Items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ...((estimate['items'] as List?)?.map((item) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Item: ${item['name'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                    Text('HSN: ${item['hsn'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                    Text('Price: ${item['price'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                    Text('Items: ${item['items'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                    Text('GST: ${item['gst'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                    Text('Cess: ${item['cess'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                    const SizedBox(height: 8),
-                  ],
-                )) ?? []),
-                const SizedBox(height: 16),
-                Text('Notes: ${estimate['notes'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 16),
-                Text('Generated on: ${DateTime.now().toLocal().toString().split('.')[0]} IST', style: const TextStyle(fontSize: 14, color: Colors.grey)),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

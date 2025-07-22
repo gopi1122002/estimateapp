@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'businessscreen.dart';
-import 'profilescreen.dart';
+import '../../Menu/profilescreen.dart';
 import 'dashboardscreen.dart'; // Replace with correct file if dashboard is separate
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+  final Map<String, dynamic>? estimateDetails; // Parameter to receive estimate data
+
+  const MainNavigationScreen({super.key, this.estimateDetails});
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -13,11 +15,13 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const DashboardScreen(),
-    const BusinessDetailsScreen(),
-    const ProfileScreen(),
-  ];
+  List<Widget> _getScreens() {
+    return [
+      DashboardScreen(estimateDetails: widget.estimateDetails),
+      const BusinessDetailsScreen(),
+      const ProfileScreen(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -28,17 +32,27 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: _getScreens()[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
+        iconSize: 30, // Increased icon size here
         backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: const Color(0xFF6ED7B9),
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.apartment), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.apartment),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: '',
+          ),
         ],
       ),
     );

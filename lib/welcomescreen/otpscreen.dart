@@ -161,6 +161,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
           maxLength: 1,
+          cursorColor: Colors.teal,
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           decoration: InputDecoration(
             counterText: "",
@@ -194,7 +195,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
               FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
             }
           },
-        ),
+        )
       ),
     );
   }

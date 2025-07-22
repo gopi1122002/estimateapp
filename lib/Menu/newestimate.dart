@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dashboardscreen.dart';
-import 'navigation.dart'; // Assuming this is mainnavigation.dart
+import '../dashboard/view/navigation.dart';// Assuming this is mainnavigation.dart
 
 class NewEstimateScreen extends StatefulWidget {
   const NewEstimateScreen({super.key});
@@ -30,6 +29,7 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
   // Local variables to store customer and item details
   Map<String, dynamic>? _customerDetails;
   List<Map<String, dynamic>> _itemDetails = [];
+  List<Map<String, dynamic>> _savedCustomers = []; // Store previously saved customers
 
   @override
   void dispose() {
@@ -72,6 +72,7 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
     final countryController = TextEditingController();
     String? placeOfSupplyValue;
     String? stateValue;
+    String? selectedCustomerName; // For dropdown selection
 
     showModalBottomSheet(
       context: context,
@@ -89,6 +90,32 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
           countryController.clear();
           placeOfSupplyValue = null;
           stateValue = null;
+          selectedCustomerName = null;
+        }
+
+        void saveCustomer() {
+          if (customerNameController.text.isNotEmpty) {
+            final newCustomer = {
+              'name': customerNameController.text,
+              'gstin': gstinController.text,
+              'placeOfSupply': placeOfSupplyValue,
+              'address': addressController.text,
+              'city': cityController.text,
+              'state': stateValue,
+              'country': countryController.text,
+            };
+            setState(() {
+              if (selectedCustomerName == null || !_savedCustomers.any((c) => c['name'] == customerNameController.text)) {
+                _savedCustomers.add(newCustomer);
+              }
+              _customerDetails = newCustomer;
+            });
+            Navigator.pop(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Please enter customer name')),
+            );
+          }
         }
 
         return Padding(
@@ -119,11 +146,11 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
                   ),
                   const Divider(),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: customerNameController,
+                  DropdownButtonFormField<String>(
+                    value: selectedCustomerName,
                     decoration: InputDecoration(
-                      labelText: "Customer Name",
-                      hintText: "Customer Name",
+                      labelText: "Select Existing Customer",
+                      hintText: "Choose or add new",
                       labelStyle: const TextStyle(color: Colors.black),
                       hintStyle: const TextStyle(color: Colors.black),
                       border: OutlineInputBorder(
@@ -134,176 +161,222 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
                           borderSide: const BorderSide(color: Colors.grey)),
                     ),
                     style: const TextStyle(color: Colors.black),
-                    cursorColor: Colors.grey,
+                    dropdownColor: Colors.white,
+                    items: _savedCustomers.map<DropdownMenuItem<String>>((customer) {
+                      return DropdownMenuItem<String>(
+                        value: customer['name'],
+                        child: Text(customer['name']),
+                      );
+                    }).toList()..add(const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text("Add New Customer"),
+                    )),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedCustomerName = newValue;
+                        if (newValue != null && newValue != "Add New Customer") {
+                          final existingCustomer = _savedCustomers.firstWhere((c) => c['name'] == newValue);
+                          customerNameController.text = existingCustomer['name'] ?? '';
+                          gstinController.text = existingCustomer['gstin'] ?? '';
+                          placeOfSupplyValue = existingCustomer['placeOfSupply'];
+                          addressController.text = existingCustomer['address'] ?? '';
+                          cityController.text = existingCustomer['city'] ?? '';
+                          stateValue = existingCustomer['state'];
+                          countryController.text = existingCustomer['country'] ?? '';
+                        } else {
+                          clearAllFields();
+                        }
+                      });
+                    },
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: TextField(
-                          controller: gstinController,
-                          decoration: InputDecoration(
-                            labelText: "GSTIN",
-                            hintText: "GSTIN",
-                            labelStyle: const TextStyle(color: Colors.black),
-                            hintStyle: const TextStyle(color: Colors.black),
-                            border: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                            enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                          ),
-                          style: const TextStyle(color: Colors.black),
-                          cursorColor: Colors.grey,
-                        ),
+                  if (selectedCustomerName == null || selectedCustomerName == "Add New Customer") ...[
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: customerNameController,
+                      decoration: InputDecoration(
+                        labelText: "Customer Name",
+                        hintText: "Customer Name",
+                        labelStyle: const TextStyle(color: Colors.black),
+                        hintStyle: const TextStyle(color: Colors.black),
+                        border: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.grey)),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.grey)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.grey)),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 5,
-                        child: DropdownButtonFormField<String>(
-                          value: placeOfSupplyValue,
-                          decoration: InputDecoration(
-                            labelText: "Place of Supply",
-                            hintText: "Choose state",
-                            labelStyle: const TextStyle(color: Colors.black),
-                            hintStyle: const TextStyle(color: Colors.black),
-                            border: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                            enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                          ),
-                          style: const TextStyle(color: Colors.black),
-                          dropdownColor: Colors.white,
-                          items: <String>['Tamil Nadu', 'Kerala', 'Andhra Pradesh']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            placeOfSupplyValue = newValue;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: addressController,
-                    decoration: InputDecoration(
-                      labelText: "Address line",
-                      hintText: "Address line",
-                      labelStyle: const TextStyle(color: Colors.black),
-                      hintStyle: const TextStyle(color: Colors.black),
-                      border: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Colors.grey)),
-                      enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Colors.grey)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Colors.grey)),
+                      style: const TextStyle(color: Colors.black),
+                      cursorColor: Colors.grey,
                     ),
-                    style: const TextStyle(color: Colors.black),
-                    cursorColor: Colors.grey,
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: TextField(
-                          controller: cityController,
-                          decoration: InputDecoration(
-                            labelText: "City",
-                            hintText: "City",
-                            labelStyle: const TextStyle(color: Colors.black),
-                            hintStyle: const TextStyle(color: Colors.black),
-                            border: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                            enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                          ),
-                          style: const TextStyle(color: Colors.black),
-                          cursorColor: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 5,
-                        child: DropdownButtonFormField<String>(
-                          value: stateValue,
-                          decoration: InputDecoration(
-                            labelText: "State",
-                            hintText: "Choose state",
-                            labelStyle: const TextStyle(color: Colors.black),
-                            hintStyle: const TextStyle(color: Colors.black),
-                            border: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                            enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.grey)),
-                          ),
-                          style: const TextStyle(color: Colors.black),
-                          dropdownColor: Colors.white,
-                          items: <String>['Tamil Nadu', 'Kerala', 'Andhra Pradesh']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            stateValue = newValue;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: DropdownButtonFormField<String>(
-                          value: countryController.text.isEmpty ? null : countryController.text,
-                          items: countryList.map((String country) {
-                            return DropdownMenuItem<String>(
-                              value: country,
-                              child: Text(country),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            countryController.text = value!;
-                          },
-                          decoration: const InputDecoration(
-                            labelText: "Country",
-                            hintText: "Select Country",
-                            labelStyle: TextStyle(color: Colors.black),
-                            hintStyle: TextStyle(color: Colors.black),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: TextField(
+                            controller: gstinController,
+                            decoration: InputDecoration(
+                              labelText: "GSTIN",
+                              hintText: "GSTIN",
+                              labelStyle: const TextStyle(color: Colors.black),
+                              hintStyle: const TextStyle(color: Colors.black),
+                              border: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey),
-                            ),
+                            style: const TextStyle(color: Colors.black),
+                            cursorColor: Colors.grey,
                           ),
-                          style: const TextStyle(color: Colors.black),
-                          dropdownColor: Colors.white,
                         ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          flex: 5,
+                          child: DropdownButtonFormField<String>(
+                            value: placeOfSupplyValue,
+                            decoration: InputDecoration(
+                              labelText: "Place of Supply",
+                              hintText: "Choose state",
+                              labelStyle: const TextStyle(color: Colors.black),
+                              hintStyle: const TextStyle(color: Colors.black),
+                              border: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                            ),
+                            style: const TextStyle(color: Colors.black),
+                            dropdownColor: Colors.white,
+                            items: <String>['Tamil Nadu', 'Kerala', 'Andhra Pradesh']
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              placeOfSupplyValue = newValue;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: addressController,
+                      decoration: InputDecoration(
+                        labelText: "Address line",
+                        hintText: "Address line",
+                        labelStyle: const TextStyle(color: Colors.black),
+                        hintStyle: const TextStyle(color: Colors.black),
+                        border: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.grey)),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.grey)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.grey)),
                       ),
-                    ],
-                  ),
+                      style: const TextStyle(color: Colors.black),
+                      cursorColor: Colors.grey,
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: TextField(
+                            controller: cityController,
+                            decoration: InputDecoration(
+                              labelText: "City",
+                              hintText: "City",
+                              labelStyle: const TextStyle(color: Colors.black),
+                              hintStyle: const TextStyle(color: Colors.black),
+                              border: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                            ),
+                            style: const TextStyle(color: Colors.black),
+                            cursorColor: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          flex: 5,
+                          child: DropdownButtonFormField<String>(
+                            value: stateValue,
+                            decoration: InputDecoration(
+                              labelText: "State",
+                              hintText: "Choose state",
+                              labelStyle: const TextStyle(color: Colors.black),
+                              hintStyle: const TextStyle(color: Colors.black),
+                              border: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.grey)),
+                            ),
+                            style: const TextStyle(color: Colors.black),
+                            dropdownColor: Colors.white,
+                            items: <String>['Tamil Nadu', 'Kerala', 'Andhra Pradesh']
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              stateValue = newValue;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: DropdownButtonFormField<String>(
+                            value: countryController.text.isEmpty ? null : countryController.text,
+                            items: countryList.map((String country) {
+                              return DropdownMenuItem<String>(
+                                value: country,
+                                child: Text(country),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              countryController.text = value!;
+                            },
+                            decoration: const InputDecoration(
+                              labelText: "Country",
+                              hintText: "Select Country",
+                              labelStyle: TextStyle(color: Colors.black),
+                              hintStyle: TextStyle(color: Colors.black),
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey),
+                              ),
+                            ),
+                            style: const TextStyle(color: Colors.black),
+                            dropdownColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 24),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -312,26 +385,7 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25)),
                     ),
-                    onPressed: () {
-                      if (customerNameController.text.isNotEmpty) {
-                        setState(() {
-                          _customerDetails = {
-                            'name': customerNameController.text,
-                            'gstin': gstinController.text,
-                            'placeOfSupply': placeOfSupplyValue,
-                            'address': addressController.text,
-                            'city': cityController.text,
-                            'state': stateValue,
-                            'country': countryController.text,
-                          };
-                        });
-                        Navigator.pop(context);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please enter customer name')),
-                        );
-                      }
-                    },
+                    onPressed: saveCustomer,
                     child: const Text("Done",
                         style: TextStyle(color: Colors.white)),
                   ),
@@ -484,28 +538,35 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
                             onPressed: () => updateItems(-1.0),
                           ),
                           Expanded(
-                            child: TextField(
-                              controller: itemsController,
-                              decoration: InputDecoration(
-                                labelText: "Items",
-                                hintText: "_",
-                                labelStyle: const TextStyle(color: Colors.black),
-                                hintStyle: const TextStyle(color: Colors.black),
-                                border: OutlineInputBorder(
-                                    borderSide: const BorderSide(color: Colors.grey)),
-                                enabledBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(color: Colors.grey)),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(color: Colors.grey)),
-                                contentPadding:
-                                const EdgeInsets.symmetric(vertical: 15),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: TextField(
+                                controller: itemsController,
+                                decoration: InputDecoration(
+                                  labelText: "Items",
+                                  hintText: "_",
+                                  labelStyle: const TextStyle(color: Colors.black),
+                                  hintStyle: const TextStyle(color: Colors.black),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: const BorderSide(color: Colors.grey),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: const BorderSide(color: Colors.grey),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: const BorderSide(color: Colors.grey),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
+                                ),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                readOnly: true,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.black),
+                                cursorColor: Colors.grey,
                               ),
-                              keyboardType:
-                              TextInputType.numberWithOptions(decimal: true),
-                              readOnly: true,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.black),
-                              cursorColor: Colors.grey,
                             ),
                           ),
                           IconButton(
@@ -784,16 +845,21 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Currency',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Currency',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _currency,
+                        isExpanded: true, // Important to prevent clipping
                         items: _currencies.map((String currency) {
                           return DropdownMenuItem<String>(
                             value: currency,
-                            child: Text(currency),
+                            child: Text(
+                              currency,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           );
                         }).toList(),
                         onChanged: (String? newValue) {
@@ -805,17 +871,24 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Select currency",
-                          labelStyle: const TextStyle(color: Colors.black),
                           hintStyle: const TextStyle(color: Colors.black),
+                          labelStyle: const TextStyle(color: Colors.black),
                           border: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.grey)),
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Colors.grey),
+                          ),
                           enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.grey)),
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Colors.grey),
+                          ),
                           focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.grey)),
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Colors.grey),
+                          ),
                         ),
                         style: const TextStyle(color: Colors.black),
                         dropdownColor: Colors.white,
+                        menuMaxHeight: 200, // ✅ Makes dropdown scrollable
                       ),
                     ],
                   ),
@@ -942,11 +1015,11 @@ class _NewEstimateScreenState extends State<NewEstimateScreen> {
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.of(dialogContext).pop();
-                                  // Navigate back to MainNavigationScreen
+                                  // Navigate back to MainNavigationScreen with estimateDetails
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => MainNavigationScreen(),
+                                      builder: (context) => MainNavigationScreen(estimateDetails: estimateDetails),
                                     ),
                                   );
                                 },

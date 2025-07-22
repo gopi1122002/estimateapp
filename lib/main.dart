@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:newproject/welcomescreen/welcomescreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'onboardingscreen.dart';
-import 'loginscreen.dart';
-import 'navigation.dart';
-import 'dashboardscreen.dart';// Assuming this contains DashboardScreen
+import 'dashboard/view/dashboardscreen.dart' show DashboardScreen;
+import 'onboardingscreen/onboardingscreen.dart';
+import 'welcomescreen/loginscreen.dart';
+// Assuming this contains DashboardScreen
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
     // Note: Your original code has a logic error: isOnboarded=true shows OnboardingScreen.
     // Assuming you meant to show LoginScreenCustomBackground when onboarded.
     if (isOnboarded) {
-      return const LoginScreenCustomBackground();
+      return const WelcomeScreen();
     } else {
       return const OnboardingScreen();
     }
