@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'businessscreen.dart';
 import '../../Menu/profilescreen.dart';
-import 'dashboardscreen.dart'; // Replace with correct file if dashboard is separate
+import 'dashboardscreen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  final Map<String, dynamic>? estimateDetails; // Parameter to receive estimate data
+  final Map<String, dynamic>? estimateDetails;
 
   const MainNavigationScreen({super.key, this.estimateDetails});
 
@@ -19,7 +19,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return [
       DashboardScreen(estimateDetails: widget.estimateDetails),
       const BusinessDetailsScreen(),
-      const ProfileScreen(),
+      const ProfileScreen(), // Reintroduced ProfileScreen to match BottomNavigationBar items
     ];
   }
 
@@ -32,9 +32,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _getScreens()[_selectedIndex],
+      body: _getScreens()[_selectedIndex], // Line 35: Now safe with 3 screens
       bottomNavigationBar: BottomNavigationBar(
-        iconSize: 30, // Increased icon size here
+        iconSize: 30,
         backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

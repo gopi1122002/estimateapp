@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'loginscreen.dart';
 import 'registerscreen.dart';
 
@@ -10,21 +11,16 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // 🌳 Background image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/tree.png', // Your combined image
+              'assets/images/tree.png',
               fit: BoxFit.cover,
             ),
           ),
-
-          // 🌿 Foreground content
           SafeArea(
             child: Column(
               children: [
                 const SizedBox(height: 60),
-
-                // 🌟 Title
                 const Text(
                   'WELCOME TO',
                   style: TextStyle(
@@ -35,7 +31,6 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-
                 const Text(
                   'ESTIMATE GENERATOR',
                   style: TextStyle(
@@ -45,10 +40,7 @@ class WelcomeScreen extends StatelessWidget {
                     letterSpacing: 1.5,
                   ),
                 ),
-
                 const SizedBox(height: 150),
-
-                // 📝 Subtitle
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: const Text(
@@ -62,11 +54,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const Spacer(),
-
-                // 🔐 Sign In Button
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: SizedBox(
@@ -74,12 +62,7 @@ class WelcomeScreen extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const LoginScreenCustomBackground(),
-                          ),
-                        );
+                        Get.to(() => const LoginScreenCustomBackground());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -97,18 +80,10 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 180),
-
-                // 🆕 Create Account Text
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const SignupScreen(),
-                      ),
-                    );
+                    Get.to(() => const SignupScreen());
                   },
                   child: const Text(
                     'Create an account',
@@ -119,7 +94,6 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 54),
               ],
             ),

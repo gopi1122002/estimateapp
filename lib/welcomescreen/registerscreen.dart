@@ -1,48 +1,62 @@
 import 'package:flutter/material.dart';
-import 'loginscreen.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'loginscreen.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({Key? key}) : super(key: key);
+class SignupController extends GetxController {
+  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  final dobController = TextEditingController();
+  final genderController = TextEditingController();
+  final maritalStatusController = TextEditingController();
+  final professionController = TextEditingController();
+  final skillsController = TextEditingController();
+  final projectsController = TextEditingController();
+
+  var obscurePassword = true.obs;
+  var obscureConfirmPassword = true.obs;
+  var showProfileSection = false.obs;
+  var selectedDate = Rxn<DateTime>();
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
-}
-
-class _SignupScreenState extends State<SignupScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final TextEditingController _dobController = TextEditingController();
-  final TextEditingController _genderController = TextEditingController();
-  final TextEditingController _maritalStatusController = TextEditingController();
-  final TextEditingController _professionController = TextEditingController();
-  final TextEditingController _skillsController = TextEditingController();
-  final TextEditingController _projectsController = TextEditingController();
-
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _showProfileSection = false;
-  DateTime? _selectedDate;
-
-  void _toggleObscurePassword() {
-    setState(() {
-      _obscurePassword = !_obscurePassword;
-    });
+  void onInit() {
+    super.onInit();
+    resetForm(); // Reset form when controller is initialized
   }
 
-  void _toggleObscureConfirmPassword() {
-    setState(() {
-      _obscureConfirmPassword = !_obscureConfirmPassword;
-    });
+  void resetForm() {
+    usernameController.clear();
+    emailController.clear();
+    phoneController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    dobController.clear();
+    genderController.clear();
+    maritalStatusController.clear();
+    professionController.clear();
+    skillsController.clear();
+    projectsController.clear();
+    showProfileSection.value = false;
+    selectedDate.value = null;
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  void toggleObscurePassword() {
+    obscurePassword.value = !obscurePassword.value;
+  }
+
+  void toggleObscureConfirmPassword() {
+    obscureConfirmPassword.value = !obscureConfirmPassword.value;
+  }
+
+  Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
+      initialDate: selectedDate.value ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -55,7 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF6ED7B9),
+                foregroundColor: Color(0xFF6ED7B9),
               ),
             ),
           ),
@@ -63,158 +77,186 @@ class _SignupScreenState extends State<SignupScreen> {
         );
       },
     );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _dobController.text = "${picked.day}/${picked.month}/${picked.year}";
-      });
+    if (picked != null && picked != selectedDate.value) {
+      selectedDate.value = picked;
+      dobController.text = "${picked.day}/${picked.month}/${picked.year}";
     }
   }
 
-  void _goToProfileInfo() {
-    if (_usernameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _phoneController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all the fields')),
-      );
+  void goToProfileInfo() {
+    if (usernameController.text.isEmpty ||
+        emailController.text.isEmpty ||
+        phoneController.text.isEmpty ||
+        passwordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty) {
+      Get.snackbar('Error', 'Please fill all the fields');
       return;
     }
 
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+    if (passwordController.text != confirmPasswordController.text) {
+      Get.snackbar('Error', 'Passwords do not match');
       return;
     }
 
-    setState(() {
-      _showProfileSection = true;
-    });
+    showProfileSection.value = true;
   }
 
-  Future<void> _submitProfile() async {
-    if (_dobController.text.isEmpty ||
-        _genderController.text.isEmpty ||
-        _maritalStatusController.text.isEmpty ||
-        _professionController.text.isEmpty ||
-        _skillsController.text.isEmpty ||
-        _projectsController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all profile fields')),
+  Future<void> registerUser() async {
+    const String baseUrl = 'https://mdqapps.tech';
+    const String url = '$baseUrl/api/estimate/register';
+
+    final Map<String, dynamic> requestBody = {
+      'name': usernameController.text.trim(),
+      'email': emailController.text.trim(),
+      'mobile number': phoneController.text.trim(),
+      'password': passwordController.text.trim(),
+      'con_password': confirmPasswordController.text.trim(),
+      'dob': dobController.text.trim(),
+      'gender': genderController.text.trim(),
+      'maritalStatus': maritalStatusController.text.trim(),
+      'professional': professionController.text.trim(),
+      'skill': skillsController.text.trim(),
+      'project': projectsController.text.trim(),
+    };
+
+    print(requestBody);
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
       );
+
+      print("@@@@@@@@@@@@@@@@@@@@@@looking for response code@@@@@@@@@@@@@@@@@@@@");
+      print(response.body);
+      print(response.statusCode);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Save data to SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('username', usernameController.text.trim());
+        await prefs.setString('email', emailController.text.trim());
+        await prefs.setString('phone', phoneController.text.trim());
+        await prefs.setString('dob', dobController.text.trim());
+        await prefs.setString('gender', genderController.text.trim());
+        await prefs.setString('maritalStatus', maritalStatusController.text.trim());
+        await prefs.setString('profession', professionController.text.trim());
+        await prefs.setString('skills', skillsController.text.trim());
+        await prefs.setString('projects', projectsController.text.trim());
+
+        Get.snackbar('Success', 'Registration successful!');
+        resetForm(); // Clear form after successful registration
+        Get.off(() => const LoginScreenCustomBackground());
+      } else {
+        Get.snackbar('Error', 'Registration failed: ${response.body}');
+      }
+    } catch (error) {
+      Get.snackbar('Error', 'Error: $error');
+    }
+  }
+
+  Future<void> submitProfile() async {
+    if (dobController.text.isEmpty ||
+        genderController.text.isEmpty ||
+        maritalStatusController.text.isEmpty ||
+        professionController.text.isEmpty ||
+        skillsController.text.isEmpty ||
+        projectsController.text.isEmpty) {
+      Get.snackbar('Error', 'Please complete all profile fields');
       return;
     }
 
-    // Save data to SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', _usernameController.text);
-    await prefs.setString('email', _emailController.text);
-    await prefs.setString('phone', _phoneController.text);
-    await prefs.setString('dob', _dobController.text);
-    await prefs.setString('gender', _genderController.text);
-    await prefs.setString('maritalStatus', _maritalStatusController.text);
-    await prefs.setString('profession', _professionController.text);
-    await prefs.setString('skills', _skillsController.text);
-    await prefs.setString('projects', _projectsController.text);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile saved successfully!')),
-    );
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreenCustomBackground()),
-    );
+    await registerUser();
   }
+}
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {TextInputType type = TextInputType.text,
-        bool obscureText = false,
-        VoidCallback? toggleObscure,
-        bool isDateField = false})
-  {
-    IconData icon;
-    switch (label) {
-      case 'Username':
-        icon = Icons.account_circle_outlined;
-        break;
-      case 'Email ID':
-        icon = Icons.email_outlined;
-        break;
-      case 'Mobile Number':
-        icon = Icons.phone_outlined;
-        break;
-      case 'Password':
-        icon = Icons.lock_outline;
-        break;
-      case 'Confirm Password':
-        icon = Icons.lock_outline;
-        break;
-      case 'Date of Birth':
-        icon = Icons.cake_outlined;
-        break;
-      case 'Gender':
-        icon = Icons.transgender_outlined;
-        break;
-      case 'Marital Status':
-        icon = Icons.favorite_border;
-        break;
-      case 'Profession':
-        icon = Icons.work_outline;
-        break;
-      case 'Skills':
-        icon = Icons.build_outlined;
-        break;
-      case 'Projects':
-        icon = Icons.folder_open_outlined;
-        break;
-      default:
-        icon = Icons.text_fields;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          keyboardType: type,
-          obscureText: obscureText,
-          cursorColor: Colors.teal,
-          readOnly: isDateField,
-          onTap: isDateField ? () => _selectDate(context) : null,
-          decoration: InputDecoration(
-            hintText: label,
-            prefixIcon: Icon(icon, color: const Color(0xFF6ED7B9)),
-            suffixIcon: toggleObscure != null
-                ? IconButton(
-              icon: Icon(
-                obscureText ? Icons.visibility_off_outlined : Icons.visibility,
-                color: Colors.grey,
-              ),
-              onPressed: toggleObscure,
-            )
-                : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.teal),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
+class SignupScreen extends StatelessWidget {
+  const SignupScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final SignupController controller = Get.put(SignupController());
+
+    Widget buildTextField(String label, TextEditingController textController,
+        {TextInputType type = TextInputType.text,
+          bool obscureText = false,
+          VoidCallback? toggleObscure,
+          bool isDateField = false}) {
+      IconData icon;
+      switch (label) {
+        case 'Username':
+          icon = Icons.account_circle_outlined;
+          break;
+        case 'Email ID':
+          icon = Icons.email_outlined;
+          break;
+        case 'Mobile Number':
+          icon = Icons.phone_outlined;
+          break;
+        case 'Password':
+          icon = Icons.lock_outline;
+          break;
+        case 'Confirm Password':
+          icon = Icons.lock_outline;
+          break;
+        case 'Date of Birth':
+          icon = Icons.cake_outlined;
+          break;
+        case 'Gender':
+          icon = Icons.transgender_outlined;
+          break;
+        case 'Marital Status':
+          icon = Icons.favorite_border;
+          break;
+        case 'Profession':
+          icon = Icons.work_outline;
+          break;
+        case 'Skills':
+          icon = Icons.build_outlined;
+          break;
+        case 'Projects':
+          icon = Icons.folder_open_outlined;
+          break;
+        default:
+          icon = Icons.text_fields;
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label),
+          const SizedBox(height: 8),
+          TextField(
+            controller: textController,
+            keyboardType: type,
+            obscureText: obscureText,
+            readOnly: isDateField,
+            onTap: isDateField ? () => controller.selectDate(context) : null,
+            decoration: InputDecoration(
+              hintText: label,
+              prefixIcon: Icon(icon, color: Color(0xFF6ED7B9)),
+              suffixIcon: toggleObscure != null
+                  ? IconButton(
+                icon: Icon(
+                  obscureText ? Icons.visibility_off_outlined : Icons.visibility,
+                  color: Colors.grey,
+                ),
+                onPressed: toggleObscure,
+              )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.teal),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -223,7 +265,7 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 80),
+              const SizedBox(height: 18),
               const Center(
                 child: Column(
                   children: [
@@ -246,67 +288,107 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               const SizedBox(height: 40),
-
-              if (!_showProfileSection) ...[
-                _buildTextField('Username', _usernameController),
-                _buildTextField('Email ID', _emailController),
-                _buildTextField('Mobile Number', _phoneController, type: TextInputType.phone),
-                _buildTextField('Password', _passwordController, obscureText: _obscurePassword, toggleObscure: _toggleObscurePassword),
-                _buildTextField('Confirm Password', _confirmPasswordController, obscureText: _obscureConfirmPassword, toggleObscure: _toggleObscureConfirmPassword),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _goToProfileInfo,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6ED7B9),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+              Obx(
+                    () => controller.showProfileSection.value
+                    ? Column(
+                  children: [
+                    const Center(
+                      child: Text(
+                        'Add Profile',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      'Next',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ] else ...[
-                const Center(
-                  child: Text(
-                    'Add Profile',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _buildTextField('Date of Birth', _dobController, isDateField: true),
-                _buildTextField('Gender', _genderController),
-                _buildTextField('Marital Status', _maritalStatusController),
-                _buildTextField('Profession', _professionController),
-                _buildTextField('Skills', _skillsController),
-                _buildTextField('Projects', _projectsController),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _submitProfile,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6ED7B9),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                    const SizedBox(height: 24),
+                    buildTextField('Date of Birth', controller.dobController, isDateField: true),
+                    buildTextField('Gender', controller.genderController),
+                    buildTextField('Marital Status', controller.maritalStatusController),
+                    buildTextField('Profession', controller.professionController),
+                    buildTextField('Skills', controller.skillsController),
+                    buildTextField('Projects', controller.projectsController),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: controller.submitProfile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6ED7B9),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          'Submit',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      'Submit',
-                      style: TextStyle(color: Colors.white),
+                  ],
+                )
+                    : Column(
+                  children: [
+                    buildTextField('Username', controller.usernameController),
+                    buildTextField('Email ID', controller.emailController),
+                    buildTextField('Mobile Number', controller.phoneController, type: TextInputType.phone),
+                    Obx(
+                          () => buildTextField(
+                        'Password',
+                        controller.passwordController,
+                        obscureText: controller.obscurePassword.value,
+                        toggleObscure: controller.toggleObscurePassword,
+                      ),
                     ),
-                  ),
+                    Obx(
+                          () => buildTextField(
+                        'Confirm Password',
+                        controller.confirmPasswordController,
+                        obscureText: controller.obscureConfirmPassword.value,
+                        toggleObscure: controller.toggleObscureConfirmPassword,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: controller.goToProfileInfo,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6ED7B9),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          'Next',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Have an account? "),
+                        TextButton(
+                          onPressed: () {
+                            Get.off(() => const LoginScreenCustomBackground());
+                          },
+                          child: const Text(
+                            "Sign In",
+                            style: TextStyle(
+                              color: Color(0xFF6ED7B9),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ]
+              ),
             ],
           ),
         ),

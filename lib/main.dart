@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:newproject/welcomescreen/welcomescreen.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dashboard/view/dashboardscreen.dart' show DashboardScreen;
+import 'welcomescreen/welcomescreen.dart';
+import 'dashboard/view/dashboardscreen.dart';
 import 'onboardingscreen/onboardingscreen.dart';
 import 'welcomescreen/loginscreen.dart';
-// Assuming this contains DashboardScreen
+import 'welcomescreen/registerscreen.dart';
+import 'dashboard/view/navigation.dart';
+import 'dashboard/view/businessscreen.dart';
+import 'Menu/profilescreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,8 +21,6 @@ class MyApp extends StatelessWidget {
     final prefs = await SharedPreferences.getInstance();
     final isOnboarded = prefs.getBool('isOnboarded') ?? false;
 
-    // Note: Your original code has a logic error: isOnboarded=true shows OnboardingScreen.
-    // Assuming you meant to show LoginScreenCustomBackground when onboarded.
     if (isOnboarded) {
       return const WelcomeScreen();
     } else {
@@ -28,25 +30,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/', // Use the home route for FutureBuilder
-      routes: {
-        '/': (context) => FutureBuilder<Widget>(
-          future: _getInitialScreen(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            } else {
-              return snapshot.data!;
-            }
-          },
+      initialRoute: '/',
+      getPages: [
+        GetPage(
+          name: '/',
+          page: () => FutureBuilder<Widget>(
+            future: _getInitialScreen(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              } else {
+                return snapshot.data!;
+              }
+            },
+          ),
         ),
-        '/login': (context) => const LoginScreenCustomBackground(),
-        '/dashboard': (context) => const DashboardScreen(),
-      },
+        GetPage(name: '/login', page: () => const LoginScreenCustomBackground()),
+        GetPage(name: '/signup', page: () => const SignupScreen()), // ✅ Corrected
+        GetPage(name: '/main_navigation', page: () => const MainNavigationScreen()),
+        GetPage(name: '/dashboard', page: () => const DashboardScreen()),
+        GetPage(name: '/business', page: () => const BusinessDetailsScreen()),
+        GetPage(name: '/profile', page: () => const ProfileScreen()),
+      ],
+      theme: ThemeData(
+        primaryColor: const Color(0xFF6ED7B9),
+        scaffoldBackgroundColor: Colors.white,
+      ),
     );
   }
 }
